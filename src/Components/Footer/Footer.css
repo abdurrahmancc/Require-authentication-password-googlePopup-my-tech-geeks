@@ -1,0 +1,14 @@
+.left-btn{
+    padding: 10px 40px 10px 40px;
+    
+}
+.right-btn{
+    padding: 10px 40px 10px 40px;
+    margin-left: 50px;
+    
+}
+
+.btn-header{
+    width: 100vw;
+    text-align: center;
+}
