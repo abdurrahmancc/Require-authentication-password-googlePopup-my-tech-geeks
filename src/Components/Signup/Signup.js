@@ -1,24 +1,56 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import GoogleLogo from "../../Assets/Image/google.svg";
 import useFirebase from "../Hooks/useFirebase";
 
 const Signup = () => {
+  const {
+    handleGooglesignInWithPopup,
+    handleCreateWithPassword,
+    loading,
+    setLoading,
+    error,
+    user,
+  } = useFirebase();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const { handleCreateWithPassword } = useFirebase();
-  const [password, setPassword] = useState("");
+  const location = useLocation();
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const from = location?.state?.from?.pathname || "/";
+  const [email, setEmail] = useState({ value: "", errors: "" });
+  const [password, setPassword] = useState({ value: "", errors: "" });
+
+  const handleEmail = (emailInput) => {
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
+      setEmail({ value: emailInput, errors: "" });
+    } else {
+      setEmail({ value: "", errors: "Invalid email" });
+    }
+  };
+
+  const handlePassword = (passwordInput) => {
+    if (/(?=.*?[#?!@$%^&*-])/.test(passwordInput)) {
+      setPassword({ value: passwordInput, errors: "" });
+    } else {
+      setPassword({
+        value: "",
+        errors: "At least one special character",
+      });
+    }
+  };
 
   const handleWithCreateEmailPassword = (e) => {
-    if (password === confirmPassword) {
-      handleCreateWithPassword(email, password);
+    if (password.value === confirmPassword) {
+      handleCreateWithPassword(email.value, password.value);
     } else {
-      setError("your password not match");
+      setPasswordError("your password not match");
+      setLoading(false);
     }
     e.preventDefault();
   };
+  if (user) {
+    navigate(from, { replace: true });
+  }
 
   return (
     <div className="auth-form-container ">
@@ -29,23 +61,26 @@ const Signup = () => {
             <label htmlFor="email">Email</label>
             <div className="input-wrapper">
               <input
-                onBlur={(e) => setEmail(e.target.value)}
+                onBlur={(e) => handleEmail(e.target.value)}
                 type="email"
                 name="email"
                 id="email"
               />
             </div>
+            {email?.errors && <span>{email.errors}</span>}
           </div>
           <div className="input-field">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
               <input
-                onBlur={(e) => setPassword(e.target.value)}
+                onBlur={(e) => handlePassword(e.target.value)}
                 type="password"
                 name="password"
                 id="password"
+                required
               />
             </div>
+            {password?.errors && <span>{password.errors}</span>}
           </div>
           <div className="input-field">
             <label htmlFor="confirm-password">Confirm Password</label>
@@ -55,11 +90,14 @@ const Signup = () => {
                 type="password"
                 name="confirmPassword"
                 id="confirm-password"
+                required
               />
             </div>
           </div>
-          <span>{error}</span>
-          <button type="submit" className="auth-form-submit">
+          {loading && <span>Loadding...</span>}
+          <span>{passwordError}</span>
+          {error && <span>{error}</span>}
+          <button onClick={() => setLoading(true)} type="submit" className="auth-form-submit">
             Sign Up
           </button>
         </form>
@@ -72,7 +110,7 @@ const Signup = () => {
           <div className="line-right" />
         </div>
         <div className="input-wrapper">
-          <button className="google-auth">
+          <button onClick={() => handleGooglesignInWithPopup()} className="google-auth">
             <img src={GoogleLogo} alt="" />
             <p> Continue with Google </p>
           </button>

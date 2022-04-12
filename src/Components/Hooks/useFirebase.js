@@ -2,6 +2,8 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -13,6 +15,8 @@ const GoogleProvider = new GoogleAuthProvider();
 
 const useFirebase = () => {
   const [user, setUser] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const location = useLocation();
   const from = location?.state?.from?.pathname || "/";
 
@@ -23,15 +27,18 @@ const useFirebase = () => {
   }, []);
 
   const handleCreateWithPassword = (email, password) => {
-    console.log(email, password);
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         setUser(userCredential.user);
         // navigate(from, { replace: true });
+        sendEmailVerification(auth.currentUser).then(() => {
+          console.log("hello");
+        });
       })
       .catch((error) => {
-        console.log(error.message);
-      });
+        setError(error.message);
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleGooglesignInWithPopup = () => {
@@ -42,7 +49,8 @@ const useFirebase = () => {
       })
       .catch((error) => {
         console.log(error);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleWithPassword = (email, password) => {
@@ -53,8 +61,9 @@ const useFirebase = () => {
         // navigate(from, { replace: true });
       })
       .catch((error) => {
-        console.log(error.message);
-      });
+        setError(error.message);
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleWithLogOut = () => {
@@ -63,17 +72,31 @@ const useFirebase = () => {
         console.log("hello hi by by");
       })
       .catch((error) => {
-        // An error happened.
+        // setError(error);
+      });
+  };
+  const handleForgatePassword = (email) => {
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        // Password reset email sent!
+        // ..
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
       });
   };
 
   return {
     user,
     setUser,
+    error,
     handleGooglesignInWithPopup,
     handleCreateWithPassword,
     handleWithPassword,
     handleWithLogOut,
+    loading,
+    setLoading,
+    handleForgatePassword,
   };
 };
 

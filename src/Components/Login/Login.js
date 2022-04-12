@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./AuthForm.css";
 import GoogleLogo from "../../Assets/Image/google.svg";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import useFirebase from "../Hooks/useFirebase";
 
@@ -10,7 +10,17 @@ const Login = () => {
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { handleGooglesignInWithPopup, handleWithPassword, user, setUser } = useFirebase();
+  // const [loading, setLoading] = useState(false);
+  const {
+    handleGooglesignInWithPopup,
+    handleWithPassword,
+    user,
+    setUser,
+    error,
+    loading,
+    handleForgatePassword,
+    setLoading,
+  } = useFirebase();
 
   const from = location?.state?.from?.pathname || "/";
 
@@ -45,10 +55,13 @@ const Login = () => {
               />
             </div>
           </div>
-          <button type="submit" className="auth-form-submit">
+          {loading && <span>Loading...</span>}
+          {error && <span>{error}</span>}
+          <button onClick={() => setLoading(true)} type="submit" className="auth-form-submit">
             Login
           </button>
         </form>
+        <button onClick={() => handleForgatePassword(email)}>Forgate Password</button>
         <p className="redirect">
           New to Tech Geeks? <span onClick={() => navigate("/signup")}>Create New Account</span>
         </p>
