@@ -9,6 +9,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import auth from "../../Firebase/Firebase.init";
 const GoogleProvider = new GoogleAuthProvider();
@@ -58,12 +59,14 @@ const useFirebase = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         setUser(userCredential.user);
+        toast.success("Successfully created!", { id: "successFull" });
+
         // navigate(from, { replace: true });
       })
       .catch((error) => {
         setError(error.message);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false), toast.dismiss());
   };
 
   const handleWithLogOut = () => {
